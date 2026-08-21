@@ -1,0 +1,19 @@
+target/
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+
+### Visual Studio Code ###
+.vscode/
+
+### Eclipse ###
+.classpath
+.project
+.settings/
+.factorypath
+
+### macOS ###
+.DS_Store
