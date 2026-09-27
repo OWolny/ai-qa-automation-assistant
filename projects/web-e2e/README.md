@@ -114,4 +114,4 @@ Everything is written inside this directory and git-ignored:
 - each shard uploads a blob report; a follow-up job merges them into one HTML report (`playwright-report` artifact),
 - CI mode (`CI=1`) enables `forbidOnly`, 2 retries and a single worker per shard. Retries are a safety net, not a fix for flaky tests.
 
-Visual baselines are Linux-only and are skipped on other platforms. In CI a missing or changed baseline fails the run and the actual image is uploaded in the `test-results-*` artifact. To regenerate baselines, run the workflow manually with **update_snapshots** enabled and commit the `visual-baselines-*` artifact contents into `tests/e2e/visual.spec.ts-snapshots/`.
+Visual baselines are Linux-only and are skipped on other platforms. In CI a missing or changed baseline fails the run; for a changed one the actual and diff images are uploaded in the `test-results-*` artifact. To regenerate baselines, run the workflow manually with **update_snapshots** enabled and commit the `visual-baselines-*` artifact contents into `tests/e2e/visual.spec.ts-snapshots/`.
