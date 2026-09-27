@@ -125,7 +125,7 @@ const ICON_PATHS: Record<string, string> = {
   dash: 'M5 8h6',
 };
 
-function icon(name: keyof typeof ICON_PATHS & string): Raw {
+function icon(name: string): Raw {
   const d = ICON_PATHS[name] ?? '';
   return html`<svg class="ico" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
 }

@@ -158,7 +158,7 @@ test.describe('Notes App', { annotation: notesAppMeta }, () => {
 
       // The SPA has no error state for this failure: the spinner stays and the dashboard never renders.
       await expect(notesHomePage.loader).toBeVisible();
-      await expect(notesHomePage.searchInput).not.toBeVisible();
+      await expect(notesHomePage.searchInput).toBeHidden();
     },
   );
 });

@@ -29,8 +29,27 @@ env:
   PW_INCLUDE_WEBKIT: '1'
 
 jobs:
+  # Cheap checks first: no browsers, so a type or lint error fails in about a minute.
+  static:
+    name: typecheck + lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: projects/web-e2e/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+
   test:
     name: test (shard ${{ matrix.shard }}/2)
+    needs: static
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -38,39 +57,43 @@ jobs:
       matrix:
         shard: [1, 2]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: projects/web-e2e/package-lock.json
       - run: npm ci
       - run: npx playwright install --with-deps chromium firefox webkit
-      - run: npm run typecheck
       - name: Run tests
+        env:
+          UPDATE_SNAPSHOTS: ${{ inputs.update_snapshots }}
+          SHARD: ${{ matrix.shard }}
         run: |
-          if [ "${{ inputs.update_snapshots }}" = "true" ]; then
-            npx playwright test --grep @visual --update-snapshots --shard=${{ matrix.shard }}/2
+          if [ "$UPDATE_SNAPSHOTS" = "true" ]; then
+            npx playwright test --grep @visual --update-snapshots --shard="$SHARD/2"
           else
-            npx playwright test --shard=${{ matrix.shard }}/2
+            npx playwright test --shard="$SHARD/2"
           fi
       - name: Upload blob report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: blob-report-${{ matrix.shard }}
           path: projects/web-e2e/blob-report
           retention-days: 7
       - name: Upload test results (traces, screenshots, actual snapshots)
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: test-results-${{ matrix.shard }}
           path: projects/web-e2e/test-results
           retention-days: 7
       - name: Upload regenerated visual baselines
         if: ${{ !cancelled() && inputs.update_snapshots }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: visual-baselines-${{ matrix.shard }}
           path: projects/web-e2e/tests/**/*-snapshots/
@@ -79,13 +102,13 @@ jobs:
 
   report:
     name: merge reports
-    if: ${{ !cancelled() }}
+    # Skipped tests (a failed static job) leave nothing to merge.
+    if: ${{ !cancelled() && needs.test.result != 'skipped' }}
     needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      # Read artifacts of earlier runs to restore the dashboard history.
-      actions: read
+      actions: read # read artifacts of earlier runs to restore the dashboard history
     env:
       HISTORY_ARTIFACT: business-report-history
       # Only full-suite runs on main extend the history; PRs and dispatches only display it.
@@ -93,14 +116,16 @@ jobs:
       # Keep in sync with the test job's shard matrix: a run with a missing shard is not recorded.
       EXPECTED_SHARDS: 2
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: projects/web-e2e/package-lock.json
       - run: npm ci
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           path: projects/web-e2e/all-blob-reports
           pattern: blob-report-*
@@ -139,7 +164,7 @@ jobs:
           # On pull requests GITHUB_SHA is a temporary merge commit; report the PR head instead.
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: npx playwright merge-reports --config merge.config.ts ./all-blob-reports
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
@@ -148,7 +173,7 @@ jobs:
           overwrite: true
       - name: Upload Business QA Dashboard
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: business-report
           path: projects/web-e2e/business-report
@@ -156,7 +181,7 @@ jobs:
           overwrite: true
       - name: Save dashboard history
         if: ${{ env.BUSINESS_REPORT_RECORD_HISTORY == '1' && steps.merge.outcome == 'success' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ env.HISTORY_ARTIFACT }}
           path: projects/web-e2e/business-report-history

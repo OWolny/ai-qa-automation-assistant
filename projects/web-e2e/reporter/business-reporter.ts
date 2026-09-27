@@ -62,6 +62,7 @@ const OUTCOME_BY_PLAYWRIGHT: Record<ReturnType<TestCase['outcome']>, Outcome> = 
 const MIN_SCOPE_RATIO = 0.9;
 
 // Matches ANSI colour/style escape sequences that Playwright puts into error messages.
+// oxlint-disable-next-line no-control-regex -- ESC is the point of this pattern.
 const ANSI = /\u001b\[[0-9;]*m/g;
 
 export default class BusinessReporter implements Reporter {
