@@ -1,6 +1,20 @@
 import { test, expect } from './fixtures';
+import { meta, Feature, Capability, Severity, Layer } from '../support/report-metadata';
 
-test.describe('Form validation', () => {
+const formValidationMeta = meta({
+  feature: Feature.formValidation,
+  capability: Capability.dataEntry,
+  severity: Severity.high,
+  layer: Layer.ui,
+});
+const inputsMeta = meta({
+  feature: Feature.formControls,
+  capability: Capability.dataEntry,
+  severity: Severity.medium,
+  layer: Layer.ui,
+});
+
+test.describe('Form validation', { annotation: formValidationMeta }, () => {
   test('shows validation feedback when required fields are empty', async ({ page }) => {
     await page.goto('/form-validation');
     await page.getByRole('button', { name: 'Register' }).click();
@@ -13,20 +27,24 @@ test.describe('Form validation', () => {
     await expect.soft(page.getByText('Please select the Paymeny Method.')).toBeVisible();
   });
 
-  test('navigates to the confirmation page on a valid submission', async ({ page }) => {
-    await page.goto('/form-validation');
-    await page.locator('input[name="ContactName"]').fill('Jane Tester');
-    await page.locator('input[name="contactnumber"]').fill('012-3456789');
-    await page.locator('input[name="pickupdate"]').fill('2027-01-15');
-    await page.getByRole('combobox', { name: 'Payment Method' }).selectOption('cash on delivery');
-    await page.getByRole('button', { name: 'Register' }).click();
+  test(
+    'navigates to the confirmation page on a valid submission',
+    { tag: '@smoke', annotation: meta({ severity: Severity.critical, layer: Layer.e2e }) },
+    async ({ page }) => {
+      await page.goto('/form-validation');
+      await page.locator('input[name="ContactName"]').fill('Jane Tester');
+      await page.locator('input[name="contactnumber"]').fill('012-3456789');
+      await page.locator('input[name="pickupdate"]').fill('2027-01-15');
+      await page.getByRole('combobox', { name: 'Payment Method' }).selectOption('cash on delivery');
+      await page.getByRole('button', { name: 'Register' }).click();
 
-    await expect(page).toHaveURL('/form-confirmation');
-    await expect(page.getByRole('alert')).toContainText('Thank you for validating your ticket');
-  });
+      await expect(page).toHaveURL('/form-confirmation');
+      await expect(page.getByRole('alert')).toContainText('Thank you for validating your ticket');
+    },
+  );
 });
 
-test.describe('Inputs', () => {
+test.describe('Inputs', { annotation: inputsMeta }, () => {
   test('displays and clears the values typed into every input', async ({ page }) => {
     await page.goto('/inputs');
     const number = page.getByRole('spinbutton', { name: 'Input: Number' });

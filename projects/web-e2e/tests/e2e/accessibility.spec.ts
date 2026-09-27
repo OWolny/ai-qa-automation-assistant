@@ -1,8 +1,16 @@
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from './fixtures';
+import { meta, Feature, Capability, Severity, Layer } from '../support/report-metadata';
 
-test.describe('Accessibility', () => {
-  test('the login form has no WCAG 2 A/AA violations', async ({ page }) => {
+const accessibilityMeta = meta({
+  feature: Feature.accessibility,
+  capability: Capability.accessibilityLayout,
+  severity: Severity.medium,
+  layer: Layer.ui,
+});
+
+test.describe('Accessibility', { annotation: accessibilityMeta }, () => {
+  test('the login form has no WCAG 2 A/AA violations', { annotation: meta({ severity: Severity.high }) }, async ({ page }) => {
     await page.goto('/login');
     const results = await new AxeBuilder({ page })
       .include('form#login')

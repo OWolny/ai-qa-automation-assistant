@@ -1,6 +1,20 @@
 import { test, expect } from './fixtures';
+import { meta, Feature, Capability, Severity, Layer } from '../support/report-metadata';
 
-test.describe('Hovers', () => {
+const mouseKeyboardLowMeta = meta({
+  feature: Feature.mouseKeyboard,
+  capability: Capability.pageInteractions,
+  severity: Severity.low,
+  layer: Layer.ui,
+});
+const dragAndDropMeta = meta({
+  feature: Feature.mouseKeyboard,
+  capability: Capability.pageInteractions,
+  severity: Severity.medium,
+  layer: Layer.ui,
+});
+
+test.describe('Hovers', { annotation: mouseKeyboardLowMeta }, () => {
   for (const n of [1, 2, 3] as const) {
     test(`hovering user ${n} reveals the caption and profile link`, async ({ page }) => {
       await page.goto('/hovers');
@@ -15,7 +29,7 @@ test.describe('Hovers', () => {
   }
 });
 
-test.describe('Drag and drop', () => {
+test.describe('Drag and drop', { annotation: dragAndDropMeta }, () => {
   test('dragging column A onto column B swaps their headers', async ({ page }) => {
     await page.goto('/drag-and-drop');
     const columnA = page.locator('#column-a');
@@ -31,7 +45,7 @@ test.describe('Drag and drop', () => {
   });
 });
 
-test.describe('Key presses', () => {
+test.describe('Key presses', { annotation: mouseKeyboardLowMeta }, () => {
   // Enter is excluded: the single-field form implicitly submits and reloads the page
   // (the page's handler never calls preventDefault), so the result is never shown.
   const cases: ReadonlyArray<{ key: string; expected: string }> = [
@@ -50,7 +64,7 @@ test.describe('Key presses', () => {
   }
 });
 
-test.describe('Context menu', () => {
+test.describe('Context menu', { annotation: mouseKeyboardLowMeta }, () => {
   test('right-clicking the hot spot shows a native alert', async ({ page }) => {
     await page.goto('/context-menu');
 

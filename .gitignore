@@ -33,6 +33,8 @@ node_modules/
 # -----------------------------------------------------------------------------
 test-results/
 playwright-report/
+business-report/
+business-report-history/
 blob-report/
 all-blob-reports/
 **/playwright/.cache/

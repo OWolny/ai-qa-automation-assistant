@@ -1,6 +1,14 @@
 import { test, expect } from './fixtures';
+import { meta, Feature, Capability, Severity, Layer } from '../support/report-metadata';
 
-test.describe('Dynamic Loading', () => {
+const dynamicMeta = meta({
+  feature: Feature.dynamicContent,
+  capability: Capability.dataPresentation,
+  severity: Severity.medium,
+  layer: Layer.ui,
+});
+
+test.describe('Dynamic Loading', { annotation: dynamicMeta }, () => {
   for (const example of [1, 2] as const) {
     test(`clicking Start eventually reveals "Hello World!" (example ${example})`, async ({ page }) => {
       await page.clock.install();
@@ -17,7 +25,7 @@ test.describe('Dynamic Loading', () => {
   }
 });
 
-test.describe('Dynamic Controls', () => {
+test.describe('Dynamic Controls', { annotation: dynamicMeta }, () => {
   test('enabling the input makes it editable and flips the button to Disable', async ({ page }) => {
     await page.goto('/dynamic-controls');
     const input = page.getByRole('textbox');
@@ -41,7 +49,7 @@ test.describe('Dynamic Controls', () => {
   });
 });
 
-test.describe('Add/Remove Elements', () => {
+test.describe('Add/Remove Elements', { annotation: dynamicMeta }, () => {
   test('adding elements and deleting one updates the Delete button count', async ({ page }) => {
     await page.goto('/add-remove-elements');
     const addButton = page.getByRole('button', { name: 'Add Element', exact: true });

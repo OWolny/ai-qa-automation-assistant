@@ -1,6 +1,20 @@
 import { test, expect } from './fixtures';
+import { meta, Feature, Capability, Severity, Layer } from '../support/report-metadata';
 
-test.describe('Dropdown', () => {
+const controlsHighMeta = meta({
+  feature: Feature.formControls,
+  capability: Capability.dataEntry,
+  severity: Severity.high,
+  layer: Layer.ui,
+});
+const controlsMediumMeta = meta({
+  feature: Feature.formControls,
+  capability: Capability.dataEntry,
+  severity: Severity.medium,
+  layer: Layer.ui,
+});
+
+test.describe('Dropdown', { annotation: controlsHighMeta }, () => {
   test('selects an option from the plain select', { tag: '@smoke' }, async ({ page }) => {
     await page.goto('/dropdown');
     const dropdown = page.locator('#dropdown');
@@ -8,7 +22,7 @@ test.describe('Dropdown', () => {
     await expect(dropdown).toHaveValue('1');
   });
 
-  test('changes the elements per page selection', async ({ page }) => {
+  test('changes the elements per page selection', { annotation: controlsMediumMeta }, async ({ page }) => {
     await page.goto('/dropdown');
     const perPage = page.getByLabel('Elements per Page:');
     await expect(perPage).toHaveValue('10');
@@ -17,7 +31,7 @@ test.describe('Dropdown', () => {
   });
 });
 
-test.describe('Checkboxes', () => {
+test.describe('Checkboxes', { annotation: controlsHighMeta }, () => {
   test('toggles both checkboxes', async ({ page }) => {
     await page.goto('/checkboxes');
     const checkbox1 = page.getByRole('checkbox', { name: 'Checkbox 1' });
@@ -34,7 +48,7 @@ test.describe('Checkboxes', () => {
   });
 });
 
-test.describe('Radio buttons', () => {
+test.describe('Radio buttons', { annotation: controlsHighMeta }, () => {
   test('checking Red unchecks the default Blue selection', async ({ page }) => {
     await page.goto('/radio-buttons');
     const blue = page.getByRole('radio', { name: 'Blue' });
@@ -47,7 +61,7 @@ test.describe('Radio buttons', () => {
     await expect(blue).not.toBeChecked();
   });
 
-  test('changing the color group does not affect the sport group', async ({ page }) => {
+  test('changing the color group does not affect the sport group', { annotation: controlsMediumMeta }, async ({ page }) => {
     await page.goto('/radio-buttons');
     const tennis = page.getByRole('radio', { name: 'Tennis' });
     await expect(tennis).toBeChecked();
@@ -57,7 +71,7 @@ test.describe('Radio buttons', () => {
     await expect(tennis).toBeChecked();
   });
 
-  test('the green radio is disabled and unchecked', async ({ page }) => {
+  test('the green radio is disabled and unchecked', { annotation: meta({ severity: Severity.low }) }, async ({ page }) => {
     await page.goto('/radio-buttons');
     const green = page.locator('input[value="green"]');
     await expect(green).toBeDisabled();
@@ -65,7 +79,7 @@ test.describe('Radio buttons', () => {
   });
 });
 
-test.describe('Horizontal slider', () => {
+test.describe('Horizontal slider', { annotation: controlsMediumMeta }, () => {
   test('adjusts the value with keyboard navigation', async ({ page }) => {
     await page.goto('/horizontal-slider');
     const slider = page.getByRole('slider');
@@ -91,7 +105,7 @@ test.describe('Horizontal slider', () => {
   });
 });
 
-test.describe('Autocomplete', () => {
+test.describe('Autocomplete', { annotation: controlsMediumMeta }, () => {
   test('selects a suggestion and submits the country', async ({ page }) => {
     await page.goto('/autocomplete');
     const input = page.locator('#country');

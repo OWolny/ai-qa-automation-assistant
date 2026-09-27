@@ -1,6 +1,20 @@
 import { test, expect } from './fixtures';
+import { meta, Feature, Capability, Severity, Layer } from '../support/report-metadata';
 
-test.describe('Geolocation', () => {
+const browserContextMeta = meta({
+  feature: Feature.browserContext,
+  capability: Capability.browserNetwork,
+  severity: Severity.medium,
+  layer: Layer.ui,
+});
+const httpHeadersMeta = meta({
+  feature: Feature.browserContext,
+  capability: Capability.browserNetwork,
+  severity: Severity.low,
+  layer: Layer.ui,
+});
+
+test.describe('Geolocation', { annotation: browserContextMeta }, () => {
   test.use({ geolocation: { latitude: 51.5074, longitude: -0.1278 }, permissions: ['geolocation'] });
 
   test('echoes the granted coordinates and resolved city', async ({ page }) => {
@@ -13,8 +27,8 @@ test.describe('Geolocation', () => {
   });
 });
 
-test.describe('Cookie alert', () => {
-  test('sets the cookie-box cookie after accepting', async ({ page, context }) => {
+test.describe('Cookie alert', { annotation: browserContextMeta }, () => {
+  test('accepting the cookie alert stores the consent cookie', async ({ page, context }) => {
     await page.goto('/cookie-alert');
 
     const before = await context.cookies();
@@ -28,7 +42,7 @@ test.describe('Cookie alert', () => {
   });
 });
 
-test.describe('HTTP headers', () => {
+test.describe('HTTP headers', { annotation: httpHeadersMeta }, () => {
   test.use({ extraHTTPHeaders: { 'x-qa-showcase': 'demo-value' } });
 
   test('echoes a custom request header in the headers table', async ({ page }) => {

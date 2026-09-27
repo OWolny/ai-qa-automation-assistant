@@ -1,8 +1,22 @@
 import { test, expect } from './fixtures';
+import { meta, Feature, Capability, Severity, Layer } from '../support/report-metadata';
 
-test.describe('Dynamic Table', () => {
+const dynamicTableMeta = meta({
+  feature: Feature.dataTables,
+  capability: Capability.dataPresentation,
+  severity: Severity.high,
+  layer: Layer.ui,
+});
+const paginationTableMeta = meta({
+  feature: Feature.dataTables,
+  capability: Capability.dataPresentation,
+  severity: Severity.medium,
+  layer: Layer.ui,
+});
+
+test.describe('Dynamic Table', { annotation: dynamicTableMeta }, () => {
   test(
-    'Chrome CPU cell matches the #chrome-cpu banner regardless of row/column order',
+    'the Chrome CPU value in the table matches the summary banner',
     { tag: '@smoke' },
     async ({ page }) => {
       await page.goto('/dynamic-table');
@@ -22,7 +36,7 @@ test.describe('Dynamic Table', () => {
   );
 });
 
-test.describe('Dynamic Pagination Table', () => {
+test.describe('Dynamic Pagination Table', { annotation: paginationTableMeta }, () => {
   test('changing the page size updates the row count and info text', async ({ page }) => {
     await page.goto('/dynamic-pagination-table');
     const body = page.getByRole('table').getByRole('rowgroup').nth(1);
