@@ -46,6 +46,7 @@ npm run install:browsers    # Chromium and Firefox
 | `npm run test:debug` | Run with the Playwright inspector |
 | `npm run list` | List tests without running them |
 | `npm run typecheck` | Type-check with `tsc` |
+| `npm run lint` | Lint with oxlint: type-aware promise rules (missing `await`) and `eslint-plugin-playwright` rules (no sleeps, no `test.only`, web-first assertions) |
 | `npm run report` | Open the latest HTML report |
 
 Filters combine with Playwright CLI options, for example `npx playwright test tests/e2e/network.spec.ts --project=firefox` or `npx playwright test --grep @api`.
@@ -232,8 +233,10 @@ Everything is written inside this directory and git-ignored:
 
 `.github/workflows/web-e2e.yml` runs on pushes to `main` and on pull requests that touch this project:
 
-- type-check, then the full suite in Chromium, Firefox, **WebKit** and mobile Chromium on Ubuntu, sharded across 2 machines,
+- a quick `static` job (type-check and lint, no browsers) gates the full suite in Chromium, Firefox, **WebKit** and mobile Chromium on Ubuntu, sharded across 2 machines,
 - each shard uploads a blob report; a follow-up job merges them into one HTML report (`playwright-report` artifact) and the Business QA Dashboard (`business-report` artifact), and on pushes to `main` updates the dashboard history (`business-report-history` artifact),
 - CI mode (`CI=1`) enables `forbidOnly`, 2 retries and a single worker per shard. Retries are a safety net, not a fix for flaky tests.
+
+Actions are pinned to commit SHAs. `.github/workflows/workflow-lint.yml` checks workflow changes with actionlint and zizmor, and Dependabot (`.github/dependabot.yml`) proposes monthly updates for the actions and this project's npm dependencies.
 
 Visual baselines are Linux-only and are skipped on other platforms. In CI a missing or changed baseline fails the run; for a changed one the actual and diff images are uploaded in the `test-results-*` artifact. To regenerate baselines, run the workflow manually with **update_snapshots** enabled and commit the `visual-baselines-*` artifact contents into `tests/e2e/visual.spec.ts-snapshots/`.

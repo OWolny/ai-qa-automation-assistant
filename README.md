@@ -36,6 +36,7 @@ cd projects/web-e2e
 npm ci
 npm run install:browsers
 npm run typecheck
+npm run lint
 npm test
 ```
 

@@ -1,0 +1,43 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "import"],
+  "jsPlugins": ["eslint-plugin-playwright"],
+  "categories": {
+    "correctness": "error"
+  },
+  "ignorePatterns": ["reporter/assets/**"],
+  "rules": {
+    "eslint/no-unused-vars": ["error", { "ignoreRestSiblings": true }],
+    "typescript/no-floating-promises": "error",
+    "typescript/await-thenable": "error",
+    "typescript/no-misused-promises": "error"
+  },
+  "overrides": [
+    {
+      "files": ["tests/**/*.ts"],
+      "rules": {
+        "playwright/missing-playwright-await": "error",
+        "playwright/no-focused-test": "error",
+        "playwright/no-skipped-test": ["error", { "allowConditional": true }],
+        "playwright/no-wait-for-timeout": "error",
+        "playwright/no-wait-for-selector": "error",
+        "playwright/no-networkidle": "error",
+        "playwright/no-page-pause": "error",
+        "playwright/no-force-option": "error",
+        "playwright/no-element-handle": "error",
+        "playwright/no-eval": "error",
+        "playwright/no-useless-await": "error",
+        "playwright/no-useless-not": "error",
+        "playwright/prefer-web-first-assertions": "error",
+        "playwright/no-conditional-in-test": "error",
+        "playwright/no-conditional-expect": "error",
+        "playwright/no-standalone-expect": "error",
+        "playwright/no-commented-out-tests": "error",
+        "playwright/valid-expect": "error",
+        "playwright/valid-title": "error",
+        "playwright/valid-describe-callback": "error",
+        "playwright/expect-expect": "error"
+      }
+    }
+  ]
+}

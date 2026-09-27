@@ -103,6 +103,8 @@ test.describe('Session isolation between browser contexts', { annotation: sessio
     browser,
     baseURL,
   }) => {
+    // Option plumbing, not a branch in the scenario: exactOptionalPropertyTypes forbids `baseURL: undefined`.
+    // oxlint-disable-next-line playwright/no-conditional-in-test
     const baseURLOption = baseURL !== undefined ? { baseURL } : {};
 
     const authedContext = await browser.newContext({
