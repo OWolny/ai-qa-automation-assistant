@@ -1,6 +1,14 @@
 import { test, expect } from './fixtures';
+import { meta, Feature, Capability, Severity, Layer } from '../support/report-metadata';
 
-test.describe('JS dialogs', () => {
+const dialogsWindowsMeta = meta({
+  feature: Feature.dialogsWindows,
+  capability: Capability.pageInteractions,
+  severity: Severity.medium,
+  layer: Layer.ui,
+});
+
+test.describe('JS dialogs', { annotation: dialogsWindowsMeta }, () => {
   test('accepting the alert shows OK', async ({ page }) => {
     await page.goto('/js-dialogs');
 
@@ -77,7 +85,7 @@ test.describe('JS dialogs', () => {
   });
 });
 
-test.describe('Windows', () => {
+test.describe('Windows', { annotation: dialogsWindowsMeta }, () => {
   test('clicking Click Here opens a new window with the example page', async ({ page }) => {
     await page.goto('/windows');
 
@@ -94,7 +102,7 @@ test.describe('Windows', () => {
   });
 });
 
-test.describe('Entry ad modal', () => {
+test.describe('Entry ad modal', { annotation: dialogsWindowsMeta }, () => {
   test('is visible on first load and hides after closing', async ({ page }) => {
     await page.goto('/entry-ad');
     const modal = page.locator('#exampleModal');

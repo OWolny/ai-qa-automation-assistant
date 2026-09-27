@@ -82,6 +82,16 @@ jobs:
     if: ${{ !cancelled() }}
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Read artifacts of earlier runs to restore the dashboard history.
+      actions: read
+    env:
+      HISTORY_ARTIFACT: business-report-history
+      # Only full-suite runs on main extend the history; PRs and dispatches only display it.
+      RECORD_ELIGIBLE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && '1' || '0' }}
+      # Keep in sync with the test job's shard matrix: a run with a missing shard is not recorded.
+      EXPECTED_SHARDS: 2
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -95,9 +105,60 @@ jobs:
           path: projects/web-e2e/all-blob-reports
           pattern: blob-report-*
           merge-multiple: true
-      - run: npx playwright merge-reports --reporter html ./all-blob-reports
+      # History lives in the newest unexpired artifact uploaded by a run on main (kept 90 days). No artifact
+      # starts a new history; an API or download error only turns recording off, so a transient failure can
+      # never replace a long history with a one-run one.
+      - name: Restore dashboard history
+        if: ${{ !inputs.update_snapshots }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          record="$RECORD_ELIGIBLE"
+          blobs=$(find all-blob-reports -name '*.zip' | wc -l)
+          if [ "$blobs" -ne "$EXPECTED_SHARDS" ]; then
+            echo "::warning::Found $blobs of $EXPECTED_SHARDS shard reports; this run is not recorded in the dashboard history."
+            record=0
+          fi
+          mkdir -p business-report-history
+          if ! run_id=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=$HISTORY_ARTIFACT&per_page=50" \
+              --jq '[.artifacts[] | select(.expired | not) | select(.workflow_run.head_branch == "main")][0].workflow_run.id // empty'); then
+            echo "::warning::Could not look up the dashboard history; this run is not recorded."
+            record=0
+          elif [ -z "$run_id" ]; then
+            echo "No earlier dashboard history found; starting a new one."
+          elif gh run download "$run_id" --repo "$GITHUB_REPOSITORY" --name "$HISTORY_ARTIFACT" --dir business-report-history; then
+            echo "Restored dashboard history from run $run_id ($(ls business-report-history | wc -l) runs)."
+          else
+            echo "::warning::Could not download the dashboard history from run $run_id; this run is not recorded."
+            record=0
+          fi
+          echo "BUSINESS_REPORT_RECORD_HISTORY=$record" >> "$GITHUB_ENV"
+      - name: Merge reports (HTML report + Business QA Dashboard)
+        id: merge
+        env:
+          # On pull requests GITHUB_SHA is a temporary merge commit; report the PR head instead.
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: npx playwright merge-reports --config merge.config.ts ./all-blob-reports
       - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
         with:
           name: playwright-report
           path: projects/web-e2e/playwright-report
           retention-days: 14
+          overwrite: true
+      - name: Upload Business QA Dashboard
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: business-report
+          path: projects/web-e2e/business-report
+          retention-days: 14
+          overwrite: true
+      - name: Save dashboard history
+        if: ${{ env.BUSINESS_REPORT_RECORD_HISTORY == '1' && steps.merge.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.HISTORY_ARTIFACT }}
+          path: projects/web-e2e/business-report-history
+          retention-days: 90
+          overwrite: true

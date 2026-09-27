@@ -13,6 +13,7 @@ const desktopProjects: Project[] = [
   ...(includeWebkit ? [{ name: 'webkit', use: { ...devices['Desktop Safari'] } }] : []),
 ].map((project) => ({
   ...project,
+  metadata: { browser: project.use?.defaultBrowserType },
   testDir: './tests/e2e',
   testIgnore: MOBILE_SPECS,
   dependencies: ['setup'],
@@ -30,10 +31,21 @@ export default defineConfig({
   updateSnapshots: isCI ? 'none' : 'missing',
   ...(isCI ? { workers: 1 } : {}),
 
-  // CI shards emit blob reports that a follow-up job merges into one HTML report.
+  // CI shards emit blob reports that the workflow merges (merge.config.ts) into the HTML report and
+  // the Business QA Dashboard. Locally, the dashboard (business-report/) sits beside the technical
+  // HTML report, which keeps the embedded trace viewer and step-level detail; full-suite local runs
+  // are recorded in business-report-history/ for the dashboard's trends.
   reporter: isCI
     ? [['list'], ['blob']]
-    : [['list'], ['html', { outputFolder: 'playwright-report', open: 'never' }]],
+    : [
+        ['list'],
+        ['html', { outputFolder: 'playwright-report', open: 'never' }],
+        ['./reporter/business-reporter.ts', { outputFolder: 'business-report', history: { folder: 'business-report-history' } }],
+      ],
+
+  // Blob reports keep metadata but not `use`, so the merged dashboard reads the target URL and each
+  // project's browser from metadata.
+  metadata: { baseURL },
 
   use: {
     baseURL,
@@ -48,6 +60,7 @@ export default defineConfig({
       name: 'setup',
       testDir: './tests/setup',
       testMatch: /.*\.setup\.ts/,
+      metadata: { browser: devices['Desktop Chrome'].defaultBrowserType },
       use: { ...devices['Desktop Chrome'] },
     },
     ...desktopProjects,
@@ -55,6 +68,7 @@ export default defineConfig({
       name: 'mobile-chromium',
       testDir: './tests/e2e',
       testMatch: MOBILE_SPECS,
+      metadata: { browser: devices['Pixel 7'].defaultBrowserType },
       use: { ...devices['Pixel 7'] },
     },
   ],

@@ -1,7 +1,46 @@
 import { test, expect } from './fixtures';
+import { meta, Feature, Capability, Severity, Layer } from '../support/report-metadata';
 
-test.describe('Slow Resource', () => {
-  test('a mocked /slow-external response renders without the real 10s delay', async ({ page }) => {
+const slowResourceMeta = meta({
+  feature: Feature.networkHandling,
+  capability: Capability.browserNetwork,
+  severity: Severity.medium,
+  layer: Layer.ui,
+});
+const randomNumberMeta = meta({
+  feature: Feature.dynamicContent,
+  capability: Capability.dataPresentation,
+  severity: Severity.low,
+  layer: Layer.ui,
+});
+const redirectorMeta = meta({
+  feature: Feature.networkHandling,
+  capability: Capability.browserNetwork,
+  severity: Severity.medium,
+  layer: Layer.e2e,
+});
+const statusCodesMeta = meta({
+  feature: Feature.networkHandling,
+  capability: Capability.browserNetwork,
+  severity: Severity.low,
+  layer: Layer.ui,
+});
+const brokenImagesMeta = meta({
+  feature: Feature.networkHandling,
+  capability: Capability.browserNetwork,
+  severity: Severity.low,
+  layer: Layer.ui,
+});
+const pageDiagnosticsMeta = meta({
+  feature: Feature.pageDiagnostics,
+  capability: Capability.browserNetwork,
+  severity: Severity.low,
+  layer: Layer.ui,
+});
+
+test.describe('Slow Resource', { annotation: slowResourceMeta }, () => {
+  test('the slow-task result is displayed once its resource responds', async ({ page }) => {
+    // Fulfilled locally so the test does not wait for the real ~10s delay.
     await page.route('**/slow-external', (route) =>
       route.fulfill({ status: 200, contentType: 'text/plain', body: 'Mocked slow task result' }),
     );
@@ -12,8 +51,8 @@ test.describe('Slow Resource', () => {
   });
 });
 
-test.describe('Random Number', () => {
-  test('stubbing Math.random forces a deterministic value', async ({ page }) => {
+test.describe('Random Number', { annotation: randomNumberMeta }, () => {
+  test('the page displays the generated random number', async ({ page }) => {
     await page.addInitScript(() => {
       Math.random = () => 0.42;
     });
@@ -24,7 +63,7 @@ test.describe('Random Number', () => {
   });
 });
 
-test.describe('Redirector', () => {
+test.describe('Redirector', { annotation: redirectorMeta }, () => {
   test('following the link redirects through /redirect (302) to /status-codes (200)', async ({ page }) => {
     await page.goto('/redirector');
 
@@ -43,7 +82,7 @@ test.describe('Redirector', () => {
   });
 });
 
-test.describe('Status Codes', () => {
+test.describe('Status Codes', { annotation: statusCodesMeta }, () => {
   for (const code of [200, 301, 404, 500] as const) {
     test(`/status-codes/${code} returns HTTP ${code}`, async ({ page }) => {
       const response = await page.goto(`/status-codes/${code}`);
@@ -52,7 +91,7 @@ test.describe('Status Codes', () => {
   }
 });
 
-test.describe('Broken Images', () => {
+test.describe('Broken Images', { annotation: brokenImagesMeta }, () => {
   test('two of the three images fail to load', async ({ page }) => {
     await page.goto('/broken-images');
 
@@ -66,7 +105,7 @@ test.describe('Broken Images', () => {
   });
 });
 
-test.describe('Console Logs', () => {
+test.describe('Console Logs', { annotation: pageDiagnosticsMeta }, () => {
   const cases = [
     { button: 'Log', type: 'log', text: 'simple message' },
     { button: 'Warning', type: 'warning', text: 'warning message' },
@@ -89,7 +128,7 @@ test.describe('Console Logs', () => {
   }
 });
 
-test.describe('JavaScript Error', () => {
+test.describe('JavaScript Error', { annotation: pageDiagnosticsMeta }, () => {
   test('loading the page raises the expected uncaught error', async ({ page }) => {
     const errorPromise = page.waitForEvent('pageerror');
 

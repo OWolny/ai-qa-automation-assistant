@@ -20,5 +20,5 @@
 
     "noEmit": true
   },
-  "include": ["playwright.config.ts", "tests/**/*.ts"]
+  "include": ["playwright.config.ts", "merge.config.ts", "tests/**/*.ts", "reporter/**/*.ts"]
 }

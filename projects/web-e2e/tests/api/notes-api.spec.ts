@@ -1,5 +1,23 @@
 import { test as base, expect } from '@playwright/test';
 import { registerUser, loginUser, deleteAccount, type RegisteredUser } from '../support/notes-api';
+import { meta, Feature, Capability, Severity, Layer } from '../support/report-metadata';
+
+const notesApiMeta = meta({
+  feature: Feature.notesAccount,
+  capability: Capability.userAccess,
+  severity: Severity.high,
+  layer: Layer.api,
+});
+const notesCriticalMeta = meta({
+  feature: Feature.notes,
+  capability: Capability.noteManagement,
+  severity: Severity.critical,
+});
+const notesMediumMeta = meta({
+  feature: Feature.notes,
+  capability: Capability.noteManagement,
+  severity: Severity.medium,
+});
 
 type NotesApiFixtures = {
   authedUser: RegisteredUser & { token: string };
@@ -16,40 +34,48 @@ const test = base.extend<NotesApiFixtures>({
   },
 });
 
-test.describe('Notes API', { tag: '@api' }, () => {
-  test('health-check reports the service is running', { tag: '@smoke' }, async ({ request }) => {
+test.describe('Notes API', { tag: '@api', annotation: notesApiMeta }, () => {
+  test('health-check reports the service is running', { tag: '@smoke', annotation: notesCriticalMeta }, async ({ request }) => {
     const response = await request.get('/notes/api/health-check');
     expect(response.status()).toBe(200);
     const body = await response.json();
     expect(body).toMatchObject({ success: true, status: 200, message: 'Notes API is Running' });
   });
 
-  test('authorizes with a login token and invalidates it on logout', async ({ authedUser, request }) => {
-    const headers = { 'x-auth-token': authedUser.token };
+  test(
+    'authorizes with a login token and invalidates it on logout',
+    { annotation: meta({ severity: Severity.critical }) },
+    async ({ authedUser, request }) => {
+      const headers = { 'x-auth-token': authedUser.token };
 
-    await test.step('a valid token authorizes profile access', async () => {
-      const profile = await request.get('/notes/api/users/profile', { headers });
-      expect(profile.status()).toBe(200);
-      expect((await profile.json()).data).toMatchObject({ email: authedUser.email, name: authedUser.name });
-    });
+      await test.step('a valid token authorizes profile access', async () => {
+        const profile = await request.get('/notes/api/users/profile', { headers });
+        expect(profile.status()).toBe(200);
+        expect((await profile.json()).data).toMatchObject({ email: authedUser.email, name: authedUser.name });
+      });
 
-    await test.step('logging out invalidates the token', async () => {
-      const logout = await request.delete('/notes/api/users/logout', { headers });
-      expect(logout.status()).toBe(200);
+      await test.step('logging out invalidates the token', async () => {
+        const logout = await request.delete('/notes/api/users/logout', { headers });
+        expect(logout.status()).toBe(200);
 
-      const profileAfterLogout = await request.get('/notes/api/users/profile', { headers });
-      expect(profileAfterLogout.status()).toBe(401);
-    });
-  });
+        const profileAfterLogout = await request.get('/notes/api/users/profile', { headers });
+        expect(profileAfterLogout.status()).toBe(401);
+      });
+    },
+  );
 
-  test('rejects registering the same email twice with 409', async ({ authedUser, request }) => {
-    const duplicate = await request.post('/notes/api/users/register', {
-      form: { name: authedUser.name, email: authedUser.email, password: authedUser.password },
-    });
-    expect(duplicate.status()).toBe(409);
-    const body = await duplicate.json();
-    expect(body.message).toBe('An account already exists with the same email address');
-  });
+  test(
+    'rejects registering the same email twice with 409',
+    { annotation: meta({ severity: Severity.medium }) },
+    async ({ authedUser, request }) => {
+      const duplicate = await request.post('/notes/api/users/register', {
+        form: { name: authedUser.name, email: authedUser.email, password: authedUser.password },
+      });
+      expect(duplicate.status()).toBe(409);
+      const body = await duplicate.json();
+      expect(body.message).toBe('An account already exists with the same email address');
+    },
+  );
 
   test('rejects profile access with no token or an invalid token', async ({ request }) => {
     const noToken = await request.get('/notes/api/users/profile');
@@ -65,7 +91,7 @@ test.describe('Notes API', { tag: '@api' }, () => {
     );
   });
 
-  test('creates, reads, updates and deletes a note', async ({ authedUser, request }) => {
+  test('creates, reads, updates and deletes a note', { annotation: notesCriticalMeta }, async ({ authedUser, request }) => {
     const headers = { 'x-auth-token': authedUser.token };
 
     const noteId = await test.step('create a note', async () => {
@@ -108,13 +134,17 @@ test.describe('Notes API', { tag: '@api' }, () => {
     });
   });
 
-  test('rejects a note with a category outside the enumerated set', async ({ authedUser, request }) => {
-    const response = await request.post('/notes/api/notes', {
-      headers: { 'x-auth-token': authedUser.token },
-      form: { title: 'Invalid category note', description: 'Should fail validation', category: 'Invalid' },
-    });
-    expect(response.status()).toBe(400);
-    const body = await response.json();
-    expect(body.message).toBe('Category must be one of the categories: Home, Work, Personal');
-  });
+  test(
+    'rejects a note with a category outside the enumerated set',
+    { annotation: notesMediumMeta },
+    async ({ authedUser, request }) => {
+      const response = await request.post('/notes/api/notes', {
+        headers: { 'x-auth-token': authedUser.token },
+        form: { title: 'Invalid category note', description: 'Should fail validation', category: 'Invalid' },
+      });
+      expect(response.status()).toBe(400);
+      const body = await response.json();
+      expect(body.message).toBe('Category must be one of the categories: Home, Work, Personal');
+    },
+  );
 });
