@@ -1,0 +1,54 @@
+# -----------------------------------------------------------------------------
+# Local AI tooling files: never committed.
+#
+# These patterns have no leading slash on purpose, so they match at ANY depth.
+# Every current and future project is covered automatically, without having
+# to edit this file when a project is added. Any file with these names that
+# appears inside the repository is ignored.
+# -----------------------------------------------------------------------------
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+PROJECT_CONTEXT.md
+
+# -----------------------------------------------------------------------------
+# Secrets and local environment
+# -----------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+
+# -----------------------------------------------------------------------------
+# Dependencies
+# -----------------------------------------------------------------------------
+node_modules/
+
+# -----------------------------------------------------------------------------
+# Test output: reports, traces, screenshots, videos
+# -----------------------------------------------------------------------------
+test-results/
+playwright-report/
+blob-report/
+all-blob-reports/
+**/playwright/.cache/
+**/playwright/.auth/
+*.trace.zip
+*.webm
+screenshots/
+coverage/
+
+# -----------------------------------------------------------------------------
+# Temporary files, logs, OS and editor files
+# -----------------------------------------------------------------------------
+*.log
+*.tmp
+tmp/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
