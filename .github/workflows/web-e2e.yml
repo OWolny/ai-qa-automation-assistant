@@ -1,11 +1,14 @@
 name: web-e2e
 
+# Pushes to main and pull requests reach this workflow through ci.yml, which calls it only when this
+# project changed. Run it by hand (workflow_dispatch) to regenerate the visual baselines.
 on:
-  push:
-    branches: [main]
-    paths: ['projects/web-e2e/**', '.github/workflows/web-e2e.yml']
-  pull_request:
-    paths: ['projects/web-e2e/**', '.github/workflows/web-e2e.yml']
+  workflow_call:
+    inputs:
+      update_snapshots:
+        description: Regenerate visual baselines and upload them as an artifact
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
       update_snapshots:
@@ -16,6 +19,8 @@ on:
 permissions:
   contents: read
 
+# Called from ci.yml, github.* describes the caller's run; the group name differs from ci.yml's so the
+# two never wait on each other.
 concurrency:
   group: web-e2e-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}

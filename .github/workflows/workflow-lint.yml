@@ -2,12 +2,9 @@ name: workflow-lint
 
 # Lints the GitHub Actions setup itself: actionlint for correctness (expressions, shellcheck on `run:`),
 # zizmor for security (unpinned actions, template injection, excessive permissions).
+# Pushes to main and pull requests reach it through ci.yml, which calls it only when `.github/` changed.
 on:
-  push:
-    branches: [main]
-    paths: ['.github/**']
-  pull_request:
-    paths: ['.github/**']
+  workflow_call:
   workflow_dispatch:
 
 permissions:
