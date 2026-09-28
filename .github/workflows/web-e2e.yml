@@ -152,7 +152,7 @@ jobs:
           elif [ -z "$run_id" ]; then
             echo "No earlier dashboard history found; starting a new one."
           elif gh run download "$run_id" --repo "$GITHUB_REPOSITORY" --name "$HISTORY_ARTIFACT" --dir business-report-history; then
-            echo "Restored dashboard history from run $run_id ($(ls business-report-history | wc -l) runs)."
+            echo "Restored dashboard history from run $run_id ($(find business-report-history -name '*.json' | wc -l) runs)."
           else
             echo "::warning::Could not download the dashboard history from run $run_id; this run is not recorded."
             record=0
