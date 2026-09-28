@@ -16,7 +16,7 @@ const dragAndDropMeta = meta({
 
 test.describe('Hovers', { annotation: mouseKeyboardLowMeta }, () => {
   for (const n of [1, 2, 3] as const) {
-    test(`hovering user ${n} reveals the caption and profile link`, async ({ page }) => {
+    test(`hovering user ${n} reveals the caption and profile link`, { tag: '@Te04c9edc' }, async ({ page }) => {
       await page.goto('/hovers');
       const card = page.getByTestId(`user-${n}`);
       await card.hover();
@@ -30,7 +30,7 @@ test.describe('Hovers', { annotation: mouseKeyboardLowMeta }, () => {
 });
 
 test.describe('Drag and drop', { annotation: dragAndDropMeta }, () => {
-  test('dragging column A onto column B swaps their headers', async ({ page }) => {
+  test('dragging column A onto column B swaps their headers', { tag: '@Tf8a50696' }, async ({ page }) => {
     await page.goto('/drag-and-drop');
     const columnA = page.locator('#column-a');
     const columnB = page.locator('#column-b');
@@ -55,7 +55,7 @@ test.describe('Key presses', { annotation: mouseKeyboardLowMeta }, () => {
   ];
 
   for (const { key, expected } of cases) {
-    test(`pressing ${key} reports "You entered: ${expected}"`, async ({ page }) => {
+    test(`pressing ${key} reports "You entered: ${expected}"`, { tag: '@T87955eff' }, async ({ page }) => {
       await page.goto('/key-presses');
       const input = page.getByRole('textbox');
       await input.press(key);
@@ -65,7 +65,7 @@ test.describe('Key presses', { annotation: mouseKeyboardLowMeta }, () => {
 });
 
 test.describe('Context menu', { annotation: mouseKeyboardLowMeta }, () => {
-  test('right-clicking the hot spot shows a native alert', async ({ page }) => {
+  test('right-clicking the hot spot shows a native alert', { tag: '@Tf0c8fb54' }, async ({ page }) => {
     await page.goto('/context-menu');
 
     let dialogType = '';

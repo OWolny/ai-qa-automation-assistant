@@ -10,7 +10,7 @@ const dynamicMeta = meta({
 
 test.describe('Dynamic Loading', { annotation: dynamicMeta }, () => {
   for (const example of [1, 2] as const) {
-    test(`clicking Start eventually reveals "Hello World!" (example ${example})`, async ({ page }) => {
+    test(`clicking Start eventually reveals "Hello World!" (example ${example})`, { tag: '@Tc2f93bac' }, async ({ page }) => {
       await page.clock.install();
       await page.goto(`/dynamic-loading/${example}`);
       await page.getByRole('button', { name: 'Start' }).click();
@@ -50,7 +50,7 @@ test.describe('Dynamic Controls', { annotation: dynamicMeta }, () => {
 });
 
 test.describe('Add/Remove Elements', { annotation: dynamicMeta }, () => {
-  test('adding elements and deleting one updates the Delete button count', async ({ page }) => {
+  test('adding elements and deleting one updates the Delete button count', { tag: '@T5dacac13' }, async ({ page }) => {
     await page.goto('/add-remove-elements');
     const addButton = page.getByRole('button', { name: 'Add Element', exact: true });
     const deleteButtons = page.getByRole('button', { name: 'Delete', exact: true });

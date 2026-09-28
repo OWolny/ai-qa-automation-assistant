@@ -64,7 +64,7 @@ test.describe('Random Number', { annotation: randomNumberMeta }, () => {
 });
 
 test.describe('Redirector', { annotation: redirectorMeta }, () => {
-  test('following the link redirects through /redirect (302) to /status-codes (200)', async ({ page }) => {
+  test('following the link redirects through /redirect (302) to /status-codes (200)', { tag: '@T11406a9d' }, async ({ page }) => {
     await page.goto('/redirector');
 
     const [response] = await Promise.all([
@@ -84,7 +84,7 @@ test.describe('Redirector', { annotation: redirectorMeta }, () => {
 
 test.describe('Status Codes', { annotation: statusCodesMeta }, () => {
   for (const code of [200, 301, 404, 500] as const) {
-    test(`/status-codes/${code} returns HTTP ${code}`, async ({ page }) => {
+    test(`/status-codes/${code} returns HTTP ${code}`, { tag: '@T90bf1cb5' }, async ({ page }) => {
       const response = await page.goto(`/status-codes/${code}`);
       expect(response?.status()).toBe(code);
     });
@@ -92,7 +92,7 @@ test.describe('Status Codes', { annotation: statusCodesMeta }, () => {
 });
 
 test.describe('Broken Images', { annotation: brokenImagesMeta }, () => {
-  test('two of the three images fail to load', async ({ page }) => {
+  test('two of the three images fail to load', { tag: '@Tc8e1ce42' }, async ({ page }) => {
     await page.goto('/broken-images');
 
     const widths = await Promise.all(
@@ -129,7 +129,7 @@ test.describe('Console Logs', { annotation: pageDiagnosticsMeta }, () => {
 });
 
 test.describe('JavaScript Error', { annotation: pageDiagnosticsMeta }, () => {
-  test('loading the page raises the expected uncaught error', async ({ page }) => {
+  test('loading the page raises the expected uncaught error', { tag: '@T60c3a374' }, async ({ page }) => {
     const errorPromise = page.waitForEvent('pageerror');
 
     await page.goto('/javascript-error');

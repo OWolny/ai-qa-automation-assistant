@@ -21,11 +21,13 @@
     "lint": "oxlint --type-aware --deny-warnings",
     "report": "playwright show-report",
     "install:browsers": "playwright install chromium firefox",
-    "test:mobile": "playwright test --project=mobile-chromium"
+    "test:mobile": "playwright test --project=mobile-chromium",
+    "test:testomat": "npx @testomatio/reporter --env-file .env run \"npx playwright test\" --kind manual"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.63.0",
+    "@testomatio/reporter": "^2.17.0",
     "@types/node": "^22.20.4",
     "eslint-plugin-playwright": "^2.12.0",
     "oxlint": "^1.85.0",

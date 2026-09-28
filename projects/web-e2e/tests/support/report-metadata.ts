@@ -23,6 +23,7 @@ export const Feature = {
   browserContext: 'Browser Context',
   networkHandling: 'Network Handling',
   pageDiagnostics: 'Page Diagnostics',
+  serviceHealth: 'Service Health',
   accessibility: 'Accessibility',
   responsiveLayout: 'Responsive Layout',
   visualAppearance: 'Visual Appearance',

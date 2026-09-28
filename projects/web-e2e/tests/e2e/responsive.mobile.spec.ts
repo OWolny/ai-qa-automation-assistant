@@ -4,12 +4,12 @@ import { meta, Feature, Capability, Severity, Layer } from '../support/report-me
 const responsiveMeta = meta({
   feature: Feature.responsiveLayout,
   capability: Capability.accessibilityLayout,
-  severity: Severity.medium,
+  severity: Severity.high,
   layer: Layer.ui,
 });
 
 test.describe('Mobile navigation (Pixel 7 emulation)', { annotation: responsiveMeta }, () => {
-  test('collapses the main nav behind a hamburger toggler', async ({ page }) => {
+  test('collapses the main nav behind a hamburger toggler', { tag: '@Tb277a5db' }, async ({ page }) => {
     await page.goto('/');
     const nav = page.getByRole('navigation', { name: 'Main navigation' });
     const toggler = nav.getByRole('button', { name: 'Toggle navigation' });
@@ -22,7 +22,7 @@ test.describe('Mobile navigation (Pixel 7 emulation)', { annotation: responsiveM
 
   test(
     'tapping the toggler reveals a nav link that can be tapped to navigate',
-    { annotation: meta({ severity: Severity.high }) },
+    { tag: '@Tb277a5db' },
     async ({ page }) => {
       await page.goto('/');
       const nav = page.getByRole('navigation', { name: 'Main navigation' });

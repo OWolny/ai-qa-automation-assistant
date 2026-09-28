@@ -15,14 +15,14 @@ const controlsMediumMeta = meta({
 });
 
 test.describe('Dropdown', { annotation: controlsHighMeta }, () => {
-  test('selects an option from the plain select', { tag: '@smoke' }, async ({ page }) => {
+  test('selects an option from the plain select', { tag: ['@smoke', '@T06984195'] }, async ({ page }) => {
     await page.goto('/dropdown');
     const dropdown = page.locator('#dropdown');
     await dropdown.selectOption({ label: 'Option 1' });
     await expect(dropdown).toHaveValue('1');
   });
 
-  test('changes the elements per page selection', { annotation: controlsMediumMeta }, async ({ page }) => {
+  test('changes the elements per page selection', { tag: '@T06984195' }, async ({ page }) => {
     await page.goto('/dropdown');
     const perPage = page.getByLabel('Elements per Page:');
     await expect(perPage).toHaveValue('10');
@@ -32,7 +32,7 @@ test.describe('Dropdown', { annotation: controlsHighMeta }, () => {
 });
 
 test.describe('Checkboxes', { annotation: controlsHighMeta }, () => {
-  test('toggles both checkboxes', async ({ page }) => {
+  test('toggles both checkboxes', { tag: '@T0b730029' }, async ({ page }) => {
     await page.goto('/checkboxes');
     const checkbox1 = page.getByRole('checkbox', { name: 'Checkbox 1' });
     const checkbox2 = page.getByRole('checkbox', { name: 'Checkbox 2' });
@@ -49,7 +49,7 @@ test.describe('Checkboxes', { annotation: controlsHighMeta }, () => {
 });
 
 test.describe('Radio buttons', { annotation: controlsHighMeta }, () => {
-  test('checking Red unchecks the default Blue selection', async ({ page }) => {
+  test('checking Red unchecks the default Blue selection', { tag: '@Te16d4c55' }, async ({ page }) => {
     await page.goto('/radio-buttons');
     const blue = page.getByRole('radio', { name: 'Blue' });
     const red = page.getByRole('radio', { name: 'Red' });
@@ -61,7 +61,7 @@ test.describe('Radio buttons', { annotation: controlsHighMeta }, () => {
     await expect(blue).not.toBeChecked();
   });
 
-  test('changing the color group does not affect the sport group', { annotation: controlsMediumMeta }, async ({ page }) => {
+  test('changing the color group does not affect the sport group', { tag: '@T3496e99a', annotation: controlsMediumMeta }, async ({ page }) => {
     await page.goto('/radio-buttons');
     const tennis = page.getByRole('radio', { name: 'Tennis' });
     await expect(tennis).toBeChecked();
@@ -71,7 +71,7 @@ test.describe('Radio buttons', { annotation: controlsHighMeta }, () => {
     await expect(tennis).toBeChecked();
   });
 
-  test('the green radio is disabled and unchecked', { annotation: meta({ severity: Severity.low }) }, async ({ page }) => {
+  test('the green radio is disabled and unchecked', { tag: '@T8d9f990f', annotation: meta({ severity: Severity.low }) }, async ({ page }) => {
     await page.goto('/radio-buttons');
     const green = page.locator('input[value="green"]');
     await expect(green).toBeDisabled();
@@ -106,7 +106,7 @@ test.describe('Horizontal slider', { annotation: controlsMediumMeta }, () => {
 });
 
 test.describe('Autocomplete', { annotation: controlsMediumMeta }, () => {
-  test('selects a suggestion and submits the country', async ({ page }) => {
+  test('selects a suggestion and submits the country', { tag: '@Tb1bbb265' }, async ({ page }) => {
     await page.goto('/autocomplete');
     const input = page.locator('#country');
     await input.fill('Uni');

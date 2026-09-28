@@ -20,7 +20,7 @@ test.describe('Accessibility', { annotation: accessibilityMeta }, () => {
     expect(results.violations.map((v) => ({ rule: v.id, nodes: v.nodes.map((n) => n.target) }))).toEqual([]);
   });
 
-  test('the inputs page core content has no WCAG 2 A/AA violations', async ({ page }) => {
+  test('the inputs page core content has no WCAG 2 A/AA violations', { tag: '@T6913e998' }, async ({ page }) => {
     await page.goto('/inputs');
     const results = await new AxeBuilder({ page })
       .include('#core')
