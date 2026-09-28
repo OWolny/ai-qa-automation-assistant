@@ -4,6 +4,9 @@ const isCI = !!process.env['CI'];
 const baseURL = process.env['BASE_URL'] || 'https://practice.expandtesting.com';
 // WebKit needs host libraries that are not available on every machine (e.g. some Windows setups).
 const includeWebkit = process.env['PW_INCLUDE_WEBKIT'] === '1';
+// Seed project for the Playwright Test Agents MCP server (`playwright run-test-mcp-server`). Its seed
+// test only opens the app for the agents to drive, so it stays out of every regular run.
+const includeAgentSeed = process.env['PW_AGENT_SEED'] === '1';
 
 const MOBILE_SPECS = /.*\.mobile\.spec\.ts/;
 
@@ -71,5 +74,15 @@ export default defineConfig({
       metadata: { browser: devices['Pixel 7'].defaultBrowserType },
       use: { ...devices['Pixel 7'] },
     },
+    ...(includeAgentSeed
+      ? [
+          {
+            name: 'agent-seed',
+            testDir: './tests/agents',
+            metadata: { browser: devices['Desktop Chrome'].defaultBrowserType },
+            use: { ...devices['Desktop Chrome'] },
+          },
+        ]
+      : []),
   ],
 });
