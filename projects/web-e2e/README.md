@@ -66,6 +66,7 @@ Filters combine with Playwright CLI options, for example `npx playwright test te
 |----------|---------|---------|
 | `BASE_URL` | `https://practice.expandtesting.com` | Target application |
 | `PW_INCLUDE_WEBKIT` | unset | `1` adds the `webkit` project |
+| `PW_AGENT_SEED` | unset | `1` adds the `agent-seed` project (`tests/agents/seed.spec.ts`), the starting page for the [Playwright Test Agents](https://playwright.dev/docs/test-agents) MCP server. Not for regular runs. |
 
 WebKit is opt-in because it needs host libraries that are missing on some machines (notably some Windows setups). To use it, run `npx playwright install webkit` first, then set `PW_INCLUDE_WEBKIT=1`.
 
