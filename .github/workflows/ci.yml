@@ -1,0 +1,95 @@
+name: ci
+
+# Single entry point for pushes to main and pull requests. It runs only the workflows whose paths
+# changed and ends with `ci-ok`, the one status check that branch protection requires. A skipped
+# workflow counts as passed, so pull requests outside those paths are never left waiting.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  changes:
+    name: detect changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      web-e2e: ${{ steps.filter.outputs.web-e2e }}
+      workflows: ${{ steps.filter.outputs.workflows }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Match changed paths
+        id: filter
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_AFTER: ${{ github.sha }}
+        run: |
+          case "$EVENT_NAME" in
+            pull_request) changed=$(git diff --name-only "$PR_BASE_SHA...$PR_HEAD_SHA") ;;
+            push) changed=$(git diff --name-only "$PUSH_BEFORE" "$PUSH_AFTER") ;;
+            *) changed="(manual run: everything)" ;;
+          esac
+          printf 'Changed files:\n%s\n' "$changed"
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            web_e2e=true
+            workflows=true
+          else
+            web_e2e=false
+            workflows=false
+            if printf '%s\n' "$changed" | grep -qE '^(projects/web-e2e/|\.github/workflows/(ci|web-e2e)\.yml$)'; then
+              web_e2e=true
+            fi
+            if printf '%s\n' "$changed" | grep -qE '^\.github/'; then
+              workflows=true
+            fi
+          fi
+          echo "web-e2e=$web_e2e" >> "$GITHUB_OUTPUT"
+          echo "workflows=$workflows" >> "$GITHUB_OUTPUT"
+
+  web-e2e:
+    needs: changes
+    if: ${{ needs.changes.outputs.web-e2e == 'true' }}
+    permissions:
+      contents: read
+      actions: read # the report job restores the dashboard history from earlier runs' artifacts
+    # `$/` (self-repository syntax) is not accepted by actionlint 1.7.12 yet; switch once it is.
+    uses: ./.github/workflows/web-e2e.yml # zizmor: ignore[self-repository]
+
+  workflow-lint:
+    needs: changes
+    if: ${{ needs.changes.outputs.workflows == 'true' }}
+    uses: ./.github/workflows/workflow-lint.yml # zizmor: ignore[self-repository]
+
+  # The required status check. Passes when every job above passed or was skipped for lack of changes.
+  ci-ok:
+    name: ci-ok
+    needs: [changes, web-e2e, workflow-lint]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check results
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Results: $RESULTS"
+          for result in $RESULTS; do
+            case "$result" in
+              success | skipped) ;;
+              *) echo "::error::A required CI job ended with '$result'."; exit 1 ;;
+            esac
+          done

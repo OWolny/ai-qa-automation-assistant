@@ -232,7 +232,7 @@ Everything is written inside this directory and git-ignored:
 
 ## Continuous integration
 
-`.github/workflows/web-e2e.yml` runs on pushes to `main` and on pull requests that touch this project:
+`.github/workflows/ci.yml` is the entry point for pushes to `main` and pull requests. It calls `.github/workflows/web-e2e.yml` when this project (or either workflow file) changed, calls the workflow lint when `.github/` changed, and ends with `ci-ok`, the single status check that branch protection requires (skipped workflows count as passed). `web-e2e.yml`:
 
 - a quick `static` job (type-check and lint, no browsers) gates the full suite in Chromium, Firefox, **WebKit** and mobile Chromium on Ubuntu, sharded across 2 machines,
 - each shard uploads a blob report; a follow-up job merges them into one HTML report (`playwright-report` artifact) and the Business QA Dashboard (`business-report` artifact), and on pushes to `main` updates the dashboard history (`business-report-history` artifact),
