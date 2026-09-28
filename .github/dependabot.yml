@@ -22,3 +22,8 @@ updates:
     groups:
       minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      # @types/node follows the Node.js major that CI runs (setup-node `node-version`), not the latest
+      # Node.js release; bump it together with that version.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
