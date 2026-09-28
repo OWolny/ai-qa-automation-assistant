@@ -13,6 +13,11 @@ const notesCriticalMeta = meta({
   capability: Capability.noteManagement,
   severity: Severity.critical,
 });
+const serviceHealthMeta = meta({
+  feature: Feature.serviceHealth,
+  capability: Capability.browserNetwork,
+  severity: Severity.critical,
+});
 const notesMediumMeta = meta({
   feature: Feature.notes,
   capability: Capability.noteManagement,
@@ -35,7 +40,7 @@ const test = base.extend<NotesApiFixtures>({
 });
 
 test.describe('Notes API', { tag: '@api', annotation: notesApiMeta }, () => {
-  test('health-check reports the service is running', { tag: '@smoke', annotation: notesCriticalMeta }, async ({ request }) => {
+  test('health-check reports the service is running', { tag: ['@smoke', '@T7bd6a391'], annotation: serviceHealthMeta }, async ({ request }) => {
     const response = await request.get('/notes/api/health-check');
     expect(response.status()).toBe(200);
     const body = await response.json();
@@ -44,7 +49,7 @@ test.describe('Notes API', { tag: '@api', annotation: notesApiMeta }, () => {
 
   test(
     'authorizes with a login token and invalidates it on logout',
-    { annotation: meta({ severity: Severity.critical }) },
+    { tag: '@Tc4988645' },
     async ({ authedUser, request }) => {
       const headers = { 'x-auth-token': authedUser.token };
 
@@ -66,7 +71,7 @@ test.describe('Notes API', { tag: '@api', annotation: notesApiMeta }, () => {
 
   test(
     'rejects registering the same email twice with 409',
-    { annotation: meta({ severity: Severity.medium }) },
+    { tag: '@T0f9036b7', annotation: meta({ severity: Severity.medium }) },
     async ({ authedUser, request }) => {
       const duplicate = await request.post('/notes/api/users/register', {
         form: { name: authedUser.name, email: authedUser.email, password: authedUser.password },
@@ -77,7 +82,7 @@ test.describe('Notes API', { tag: '@api', annotation: notesApiMeta }, () => {
     },
   );
 
-  test('rejects profile access with no token or an invalid token', async ({ request }) => {
+  test('rejects profile access with no token or an invalid token', { tag: '@T0f4b61b3' }, async ({ request }) => {
     const noToken = await request.get('/notes/api/users/profile');
     expect(noToken.status()).toBe(401);
     expect((await noToken.json()).message).toBe('No authentication token specified in x-auth-token header');
@@ -91,7 +96,7 @@ test.describe('Notes API', { tag: '@api', annotation: notesApiMeta }, () => {
     );
   });
 
-  test('creates, reads, updates and deletes a note', { annotation: notesCriticalMeta }, async ({ authedUser, request }) => {
+  test('creates, reads, updates and deletes a note', { tag: '@T4533fca5', annotation: notesCriticalMeta }, async ({ authedUser, request }) => {
     const headers = { 'x-auth-token': authedUser.token };
 
     const noteId = await test.step('create a note', async () => {
@@ -136,7 +141,7 @@ test.describe('Notes API', { tag: '@api', annotation: notesApiMeta }, () => {
 
   test(
     'rejects a note with a category outside the enumerated set',
-    { annotation: notesMediumMeta },
+    { tag: '@T599caa06', annotation: notesMediumMeta },
     async ({ authedUser, request }) => {
       const response = await request.post('/notes/api/notes', {
         headers: { 'x-auth-token': authedUser.token },

@@ -1,4 +1,4 @@
-import { defineConfig, devices, type Project } from '@playwright/test';
+import { defineConfig, devices, type Project, type ReporterDescription } from '@playwright/test';
 
 const isCI = !!process.env['CI'];
 const baseURL = process.env['BASE_URL'] || 'https://practice.expandtesting.com';
@@ -7,6 +7,12 @@ const includeWebkit = process.env['PW_INCLUDE_WEBKIT'] === '1';
 // Seed project for the Playwright Test Agents MCP server (`playwright run-test-mcp-server`). Its seed
 // test only opens the app for the agents to drive, so it stays out of every regular run.
 const includeAgentSeed = process.env['PW_AGENT_SEED'] === '1';
+
+// Testomat.io reporting runs only when a project reporting key is provided. Tests map to their
+// Testomat cases through an `@T<id>` tag; without the key the tags are plain Playwright tags.
+const testomatReporter: ReporterDescription[] = process.env['TESTOMATIO']
+  ? [['@testomatio/reporter/playwright', { apiKey: process.env['TESTOMATIO'] }]]
+  : [];
 
 const MOBILE_SPECS = /.*\.mobile\.spec\.ts/;
 
@@ -39,11 +45,12 @@ export default defineConfig({
   // HTML report, which keeps the embedded trace viewer and step-level detail; full-suite local runs
   // are recorded in business-report-history/ for the dashboard's trends.
   reporter: isCI
-    ? [['list'], ['blob']]
+    ? [['list'], ['blob'], ...testomatReporter]
     : [
         ['list'],
         ['html', { outputFolder: 'playwright-report', open: 'never' }],
         ['./reporter/business-reporter.ts', { outputFolder: 'business-report', history: { folder: 'business-report-history' } }],
+        ...testomatReporter,
       ],
 
   // Blob reports keep metadata but not `use`, so the merged dashboard reads the target URL and each

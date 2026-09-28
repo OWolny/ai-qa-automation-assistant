@@ -16,7 +16,7 @@ const fileDownloadMeta = meta({
 });
 
 test.describe('File upload', { annotation: fileUploadMeta }, () => {
-  test('a user can upload a small file and see it confirmed', async ({ page }) => {
+  test('a user can upload a small file and see it confirmed', { tag: '@T0ce046f2' }, async ({ page }) => {
     await page.goto('/upload');
     await page.getByTestId('file-input').setInputFiles({
       name: 'playwright-showcase.txt',
@@ -32,7 +32,7 @@ test.describe('File upload', { annotation: fileUploadMeta }, () => {
 
   test(
     'a file over 500KB is rejected before submitting',
-    { annotation: meta({ severity: Severity.high, layer: Layer.ui }) },
+    { tag: '@T2a34fe65', annotation: meta({ severity: Severity.high, layer: Layer.ui }) },
     async ({ page }) => {
       await page.goto('/upload');
       await page.getByTestId('file-input').setInputFiles({
@@ -50,7 +50,7 @@ test.describe('File upload', { annotation: fileUploadMeta }, () => {
 });
 
 test.describe('Downloads', { annotation: fileDownloadMeta }, () => {
-  test('a user can download an available file with its expected content', { tag: '@smoke' }, async ({ page }, testInfo) => {
+  test('a user can download an available file with its expected content', { tag: ['@smoke', '@T0dccf0d6'] }, async ({ page }, testInfo) => {
     await page.goto('/download');
 
     const downloadPromise = page.waitForEvent('download');

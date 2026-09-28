@@ -17,7 +17,7 @@ const httpHeadersMeta = meta({
 test.describe('Geolocation', { annotation: browserContextMeta }, () => {
   test.use({ geolocation: { latitude: 51.5074, longitude: -0.1278 }, permissions: ['geolocation'] });
 
-  test('echoes the granted coordinates and resolved city', async ({ page }) => {
+  test('echoes the granted coordinates and resolved city', { tag: '@T437f8459' }, async ({ page }) => {
     await page.goto('/geolocation');
     await page.getByRole('button', { name: 'Where am I?' }).click();
 
@@ -45,7 +45,7 @@ test.describe('Cookie alert', { annotation: browserContextMeta }, () => {
 test.describe('HTTP headers', { annotation: httpHeadersMeta }, () => {
   test.use({ extraHTTPHeaders: { 'x-qa-showcase': 'demo-value' } });
 
-  test('echoes a custom request header in the headers table', async ({ page }) => {
+  test('echoes a custom request header in the headers table', { tag: '@Tad3d3284' }, async ({ page }) => {
     await page.goto('/http-headers');
 
     const row = page.getByRole('row').filter({ has: page.getByRole('cell', { name: 'x-qa-showcase', exact: true }) });

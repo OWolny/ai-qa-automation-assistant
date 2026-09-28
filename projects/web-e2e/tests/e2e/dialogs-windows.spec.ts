@@ -9,7 +9,7 @@ const dialogsWindowsMeta = meta({
 });
 
 test.describe('JS dialogs', { annotation: dialogsWindowsMeta }, () => {
-  test('accepting the alert shows OK', async ({ page }) => {
+  test('accepting the alert shows OK', { tag: '@T30eea2a0' }, async ({ page }) => {
     await page.goto('/js-dialogs');
 
     let dialogType = '';
@@ -27,7 +27,7 @@ test.describe('JS dialogs', { annotation: dialogsWindowsMeta }, () => {
     await expect(page.locator('#dialog-response')).toHaveText('OK');
   });
 
-  test('accepting the confirm shows Ok', async ({ page }) => {
+  test('accepting the confirm shows Ok', { tag: '@T333bff45' }, async ({ page }) => {
     await page.goto('/js-dialogs');
 
     let dialogType = '';
@@ -45,7 +45,7 @@ test.describe('JS dialogs', { annotation: dialogsWindowsMeta }, () => {
     await expect(page.locator('#dialog-response')).toHaveText('Ok');
   });
 
-  test('dismissing the confirm shows Cancel', async ({ page }) => {
+  test('dismissing the confirm shows Cancel', { tag: '@T333bff45' }, async ({ page }) => {
     await page.goto('/js-dialogs');
 
     page.once('dialog', (dialog) => {
@@ -57,7 +57,7 @@ test.describe('JS dialogs', { annotation: dialogsWindowsMeta }, () => {
     await expect(page.locator('#dialog-response')).toHaveText('Cancel');
   });
 
-  test('accepting the prompt with text fills the response', async ({ page }) => {
+  test('accepting the prompt with text fills the response', { tag: '@Td8fc47cb' }, async ({ page }) => {
     await page.goto('/js-dialogs');
 
     let dialogType = '';
@@ -72,7 +72,7 @@ test.describe('JS dialogs', { annotation: dialogsWindowsMeta }, () => {
     await expect(page.locator('#dialog-response')).toHaveText('Hello Playwright');
   });
 
-  test('dismissing the prompt clears the response', async ({ page }) => {
+  test('dismissing the prompt clears the response', { tag: '@Td8fc47cb' }, async ({ page }) => {
     await page.goto('/js-dialogs');
 
     page.once('dialog', (dialog) => {
@@ -86,7 +86,7 @@ test.describe('JS dialogs', { annotation: dialogsWindowsMeta }, () => {
 });
 
 test.describe('Windows', { annotation: dialogsWindowsMeta }, () => {
-  test('clicking Click Here opens a new window with the example page', async ({ page }) => {
+  test('clicking Click Here opens a new window with the example page', { tag: '@Tf248022d' }, async ({ page }) => {
     await page.goto('/windows');
 
     const popupPromise = page.waitForEvent('popup');

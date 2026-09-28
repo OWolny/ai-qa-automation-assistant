@@ -15,7 +15,7 @@ const inputsMeta = meta({
 });
 
 test.describe('Form validation', { annotation: formValidationMeta }, () => {
-  test('shows validation feedback when required fields are empty', async ({ page }) => {
+  test('shows validation feedback when required fields are empty', { tag: '@Tfd6a8f3b' }, async ({ page }) => {
     await page.goto('/form-validation');
     await page.getByRole('button', { name: 'Register' }).click();
 
@@ -29,7 +29,7 @@ test.describe('Form validation', { annotation: formValidationMeta }, () => {
 
   test(
     'navigates to the confirmation page on a valid submission',
-    { tag: '@smoke', annotation: meta({ severity: Severity.critical, layer: Layer.e2e }) },
+    { tag: ['@smoke', '@T4d5b4dec'], annotation: meta({ severity: Severity.critical, layer: Layer.e2e }) },
     async ({ page }) => {
       await page.goto('/form-validation');
       await page.locator('input[name="ContactName"]').fill('Jane Tester');
@@ -45,7 +45,7 @@ test.describe('Form validation', { annotation: formValidationMeta }, () => {
 });
 
 test.describe('Inputs', { annotation: inputsMeta }, () => {
-  test('displays and clears the values typed into every input', async ({ page }) => {
+  test('displays and clears the values typed into every input', { tag: '@Tc79355ca' }, async ({ page }) => {
     await page.goto('/inputs');
     const number = page.getByRole('spinbutton', { name: 'Input: Number' });
     const text = page.getByRole('textbox', { name: 'Input: Text' });

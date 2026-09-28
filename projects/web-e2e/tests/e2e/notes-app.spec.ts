@@ -39,7 +39,7 @@ const test = base.extend<NotesAppFixtures>({
 test.describe('Notes App', { annotation: notesAppMeta }, () => {
   test(
     'an API-registered user can log in through the UI and sees the empty state',
-    { tag: '@smoke', annotation: notesAccountMeta },
+    { tag: ['@smoke', '@Td754851c'], annotation: notesAccountMeta },
     async ({ notesLoginPage, notesHomePage, apiUser }) => {
       await notesLoginPage.goto();
       await notesLoginPage.login(apiUser.email, apiUser.password);
@@ -74,7 +74,7 @@ test.describe('Notes App', { annotation: notesAppMeta }, () => {
 
   test(
     'a wrong password shows the incorrect-credentials alert',
-    { annotation: notesAccountHighMeta },
+    { tag: '@T54579eaa', annotation: notesAccountHighMeta },
     async ({ notesLoginPage, apiUser }) => {
       await notesLoginPage.goto();
       await notesLoginPage.login(apiUser.email, 'WrongPassword123!');

@@ -15,7 +15,7 @@ const shadowDomMeta = meta({
 });
 
 test.describe('Iframe email subscribe', { annotation: iframeMeta }, () => {
-  test('subscribing with an email shows the success message', async ({ page }) => {
+  test('subscribing with an email shows the success message', { tag: '@T61bfaf4c' }, async ({ page }) => {
     await page.goto('/iframe');
     const frame = page.frameLocator('#email-subscribe');
 

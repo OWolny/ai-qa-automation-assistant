@@ -17,7 +17,7 @@ const paginationTableMeta = meta({
 test.describe('Dynamic Table', { annotation: dynamicTableMeta }, () => {
   test(
     'the Chrome CPU value in the table matches the summary banner',
-    { tag: '@smoke' },
+    { tag: ['@smoke', '@T0e0edb58'] },
     async ({ page }) => {
       await page.goto('/dynamic-table');
       const table = page.getByRole('table');
@@ -37,7 +37,7 @@ test.describe('Dynamic Table', { annotation: dynamicTableMeta }, () => {
 });
 
 test.describe('Dynamic Pagination Table', { annotation: paginationTableMeta }, () => {
-  test('changing the page size updates the row count and info text', async ({ page }) => {
+  test('changing the page size updates the row count and info text', { tag: '@T2ac8183d' }, async ({ page }) => {
     await page.goto('/dynamic-pagination-table');
     const body = page.getByRole('table').getByRole('rowgroup').nth(1);
 
@@ -59,18 +59,22 @@ test.describe('Dynamic Pagination Table', { annotation: paginationTableMeta }, (
     await expect(page.getByText('Showing 6 to 10 of 10 entries')).toBeVisible();
   });
 
-  test('searching filters the visible rows', async ({ page }) => {
-    await page.goto('/dynamic-pagination-table');
-    const body = page.getByRole('table').getByRole('rowgroup').nth(1);
+  test(
+    'searching filters the visible rows',
+    { tag: '@T8d843c93', annotation: meta({ severity: Severity.high }) },
+    async ({ page }) => {
+      await page.goto('/dynamic-pagination-table');
+      const body = page.getByRole('table').getByRole('rowgroup').nth(1);
 
-    await page.getByRole('searchbox').fill('Emma');
+      await page.getByRole('searchbox').fill('Emma');
 
-    await expect(body.getByRole('row')).toHaveCount(1);
-    await expect(body.getByRole('row').first()).toContainText('Emma Brown');
-    await expect(page.getByText('Showing 1 to 1 of 1 entries (filtered from 10 total entries)')).toBeVisible();
-  });
+      await expect(body.getByRole('row')).toHaveCount(1);
+      await expect(body.getByRole('row').first()).toContainText('Emma Brown');
+      await expect(page.getByText('Showing 1 to 1 of 1 entries (filtered from 10 total entries)')).toBeVisible();
+    },
+  );
 
-  test('clicking the sorted Student Name header reverses the order', async ({ page }) => {
+  test('clicking the sorted Student Name header reverses the order', { tag: '@Te5de219c' }, async ({ page }) => {
     await page.goto('/dynamic-pagination-table');
     const table = page.getByRole('table');
     await page.getByRole('combobox', { name: /show entries/i }).selectOption('10');

@@ -37,21 +37,21 @@ const VALID_USERNAME = 'practice';
 const VALID_PASSWORD = 'SuperSecretPassword!';
 
 test.describe('Login', { annotation: loginMeta }, () => {
-  test('logs in with valid credentials and reaches the secure area', { tag: '@smoke' }, async ({ page, loginPage }) => {
+  test('logs in with valid credentials and reaches the secure area', { tag: ['@smoke', '@T0a7cb8f6'] }, async ({ page, loginPage }) => {
     await loginPage.goto();
     await loginPage.login(VALID_USERNAME, VALID_PASSWORD);
     await expect(page).toHaveURL('/secure');
     await expect(page.getByRole('main')).toContainText('You logged into a secure area!');
   });
 
-  test('shows an error for an invalid password', { annotation: meta({ severity: Severity.high }) }, async ({ loginPage }) => {
+  test('shows an error for an invalid password', { tag: '@T25cc9fb5', annotation: meta({ severity: Severity.high }) }, async ({ loginPage }) => {
     await loginPage.goto();
     await loginPage.login(VALID_USERNAME, 'WrongPassword!');
     // The on-page docs claim "Invalid password." but the real alert text differs.
     await expect(loginPage.alert).toContainText('Your password is invalid!');
   });
 
-  test('redirects unauthenticated visitors from the secure area to login', async ({ page }) => {
+  test('redirects unauthenticated visitors from the secure area to login', { tag: '@T91409ce1' }, async ({ page }) => {
     await page.goto('/secure');
     await expect(page).toHaveURL('/login');
     await expect(page.getByRole('alert')).toContainText('You must login to view the secure area!');
@@ -62,7 +62,7 @@ test.describe('Authenticated via stored session', { annotation: storedSessionMet
   // Loaded from the auth setup project's storageState file instead of logging in through the UI.
   test.use({ storageState: PRACTICE_USER_STORAGE_STATE_PATH });
 
-  test('starts already logged in on the secure area', async ({ page }) => {
+  test('starts already logged in on the secure area', { tag: '@T193d3ac7' }, async ({ page }) => {
     await page.goto('/secure');
     await expect(page).toHaveURL('/secure');
     await expect(page.getByRole('main')).toContainText('Hi, practice!');
@@ -73,7 +73,7 @@ test.describe('Authenticated via stored session', { annotation: storedSessionMet
 });
 
 test.describe('OTP login', { annotation: otpLoginMeta }, () => {
-  test('logs in with the documented email and OTP code', async ({ page }) => {
+  test('logs in with the documented email and OTP code', { tag: '@T43104b77' }, async ({ page }) => {
     await page.goto('/otp-login');
     await page.getByRole('textbox', { name: 'Your Email Address' }).fill('practice@expandtesting.com');
     await page.getByRole('button', { name: 'Send OTP Code' }).click();
@@ -83,7 +83,7 @@ test.describe('OTP login', { annotation: otpLoginMeta }, () => {
     await expect(page).toHaveURL('/secure');
   });
 
-  test('shows an error for an incorrect OTP code', { annotation: meta({ severity: Severity.medium }) }, async ({ page }) => {
+  test('shows an error for an incorrect OTP code', { tag: '@T2d7bad07' }, async ({ page }) => {
     await page.goto('/otp-login');
     await page.getByRole('textbox', { name: 'Your Email Address' }).fill('practice@expandtesting.com');
     await page.getByRole('button', { name: 'Send OTP Code' }).click();
@@ -99,7 +99,7 @@ test.describe('Session isolation between browser contexts', { annotation: sessio
   // Distinct from "Authenticated via stored session" above: this builds two contexts with
   // different auth state side by side in one test, and loads storageState from a file path
   // (rather than an inline object) to prove a context without it is genuinely logged out.
-  test('a saved session stays signed in while a new browser session stays signed out', async ({
+  test('a saved session stays signed in while a new browser session stays signed out', { tag: '@T193d3ac7' }, async ({
     browser,
     baseURL,
   }) => {
@@ -136,7 +136,7 @@ test.describe('Session isolation between browser contexts', { annotation: sessio
 test.describe('HTTP Basic auth with valid credentials', { annotation: basicAuthMeta }, () => {
   test.use({ httpCredentials: { username: 'admin', password: 'admin' } });
 
-  test('returns 200 and the success message', async ({ page }) => {
+  test('returns 200 and the success message', { tag: '@T83b73f48' }, async ({ page }) => {
     const response = await page.goto('/basic-auth');
     expect(response?.status()).toBe(200);
     await expect(page.getByRole('main')).toContainText('Congratulations! You must have the proper credentials.');
@@ -144,7 +144,7 @@ test.describe('HTTP Basic auth with valid credentials', { annotation: basicAuthM
 });
 
 test.describe('HTTP Basic auth without credentials', { annotation: basicAuthMeta }, () => {
-  test('returns 401', async ({ page }) => {
+  test('returns 401', { tag: '@T01194efc' }, async ({ page }) => {
     const response = await page.goto('/basic-auth');
     expect(response?.status()).toBe(401);
   });

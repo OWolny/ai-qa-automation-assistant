@@ -67,6 +67,7 @@ Filters combine with Playwright CLI options, for example `npx playwright test te
 | `BASE_URL` | `https://practice.expandtesting.com` | Target application |
 | `PW_INCLUDE_WEBKIT` | unset | `1` adds the `webkit` project |
 | `PW_AGENT_SEED` | unset | `1` adds the `agent-seed` project (`tests/agents/seed.spec.ts`), the starting page for the [Playwright Test Agents](https://playwright.dev/docs/test-agents) MCP server. Not for regular runs. |
+| `TESTOMATIO` | unset | Testomat.io project reporting key. When set, results are also reported to Testomat.io (see [Test management](#test-management-testomatio)). Never commit it. |
 
 WebKit is opt-in because it needs host libraries that are missing on some machines (notably some Windows setups). To use it, run `npx playwright install webkit` first, then set `PW_INCLUDE_WEBKIT=1`.
 
@@ -161,6 +162,7 @@ Tags are for **selecting** tests to run; annotations are for **reporting**.
 | `@smoke` | Fast check of the core journeys (`npm run test:smoke`) |
 | `@api` | Notes API tests (`--grep @api`) |
 | `@visual` | Screenshot comparisons, Linux baselines only (used by the CI baseline update) |
+| `@T<id>` | The Testomat.io case the test verifies (see [Test management](#test-management-testomatio)); not a run selector |
 
 Every test carries four annotations, set with `meta()` and the constants from `tests/support/report-metadata.ts`. Never type the values by hand: the dashboard groups by exact strings.
 
@@ -170,6 +172,8 @@ Every test carries four annotations, set with `meta()` and the constants from `t
 | `businessCapability` | Business capability the feature serves (coarser) | `Capability.*`, e.g. `User Access`, `Note Management`, `Data Entry` |
 | `severity` | Business impact if the scenario fails | `critical`, `high`, `medium`, `low` |
 | `layer` | How the scenario exercises the product | `E2E` (user journey with a server round-trip), `UI` (client-side behaviour of one page), `API` (HTTP only) |
+
+When a test verifies a Testomat.io case, its `severity` follows the case's priority: critical → `critical`, important or high → `high`, normal → `medium`, low → `low`.
 
 ```ts
 test.describe('File upload', {
@@ -218,6 +222,30 @@ The dashboard lists the rules that fired. There is no composite quality score.
 | `reporter/aggregate.ts` | Statistics, failure classification and the overall-status rules (pure functions) |
 | `reporter/history.ts` | History snapshots (load, save, prune), which runs are recorded, and the trends |
 | `reporter/render-html.ts` | Renders the dashboard HTML from a `RunReport` |
+
+## Test management (Testomat.io)
+
+The logical test cases live in Testomat.io as framework-neutral manual cases. A test declares the case it fully verifies with the case's Testomat.io ID as a Playwright tag, which the reporter maps to that case:
+
+```ts
+test('logs in with valid credentials and reaches the secure area', { tag: ['@smoke', '@T0a7cb8f6'] }, async ({ page, loginPage }) => {
+  // ...
+});
+```
+
+- IDs are the ones Testomat.io generates (`@T` + 8 hex characters). Test titles stay free of IDs, and there is no other ID scheme.
+- One case per test. Tag a test only when it fully verifies the case. A test covering part of a case stays untagged until the coverage is complete, so a green run never marks an unverified case as passed.
+- Several tests (and every browser project) may report to the same case. Each result is kept in the run, and the run fails if any of them fails. A case's "last status" shows only the most recent result, so judge a case by the run.
+- On the first report Testomat.io marks the case as automated and shows the ID in its title. The case's steps and priority are unchanged.
+- Other frameworks report to the same case IDs, for example Selenide with `@TestId("<id>")` from `java-reporter-junit`.
+- `@testomatio/reporter/playwright` is added to the reporters only when `TESTOMATIO` is set. `npm run test:testomat` reads it from the git-ignored `.env` and reports the full suite as a Testomat.io "manual" run, where results land on the tagged cases:
+
+```bash
+echo "TESTOMATIO=<key>" > .env      # once, never commit
+npm run test:testomat
+```
+
+`@T…` tags are ordinary Playwright tags, so the Business QA Dashboard lists them with the run-selection tags.
 
 ## Artifacts
 
